@@ -1,0 +1,26 @@
+[package]
+name = "momentum"
+version = "0.1.0"
+authors = ["Jayce Fayne <jayce.fayne@mailbox.org>"]
+edition = "2018"
+description = "A simple wrapper for the Momentum API"
+license = "MIT"
+repository = "https://github.com/jaycefayne/momentum-rs"
+categories = ["asynchronous", "concurrency", "network-programming"]
+keywords = ["momentum", "rest", "http", "async"]
+readme = "README.md"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+fehler = "1"
+http = "0.2"
+hyper = "0.13"
+hyper-tls = "0.4"
+bytes = "0.5"
+tokio = "0.2"
+chrono = "0.4"
+anyhow = "1.0"
+
+[dev-dependencies]
+tokio = { version = "0.2", features = ["macros"] }
