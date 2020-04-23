@@ -1,10 +1,9 @@
 use crate::reply::*;
 use crate::routes::*;
-use crate::Error;
+use crate::Fallible;
 use anyhow::bail;
 use bytes::buf::BufExt as _;
 use chrono::{Date, TimeZone};
-use fehler::throws;
 use http::header::{HeaderValue, ACCEPT, CONTENT_TYPE, HOST};
 use http::request::Request;
 use http::uri::{Authority, Parts as UriParts, PathAndQuery, Scheme, Uri};
@@ -43,12 +42,11 @@ impl Client {
         }
     }
 
-    #[throws]
     pub(crate) async fn request<D: Deserialize, T: AsRef<[u8]> + 'static>(
         &self,
         method: Method,
         path_and_query: T,
-    ) -> D {
+    ) -> Fallible<D> {
         let mut uri_parts = UriParts::default();
         uri_parts.authority = Some(Authority::from_static(MOMENTUM_HOST));
         uri_parts.scheme = Some(Scheme::HTTPS);
@@ -75,12 +73,11 @@ impl Client {
             bail!("got http status code '{}'", status_code)
         } else {
             let body = hyper::body::aggregate(resp).await?;
-            serde_json::from_reader(body.reader())?
+            Ok(serde_json::from_reader(body.reader())?)
         }
     }
 
-    #[throws]
-    async fn get_feed_from<Tz: TimeZone>(&self, date: Date<Tz>) -> Feed
+    async fn get_feed_from<Tz: TimeZone>(&self, date: Date<Tz>) -> Fallible<Feed>
     where
         Tz::Offset: std::fmt::Display,
     {
@@ -92,11 +89,10 @@ impl Client {
                 date.format("%Y-%m-%d")
             ),
         )
-        .await?
+        .await
     }
 
-    #[throws]
-    pub async fn get_feed(&self) -> Feed {
-        self.get_feed_from(chrono::Local::today()).await?
+    pub async fn get_feed(&self) -> Fallible<Feed> {
+        self.get_feed_from(chrono::Local::today()).await
     }
 }
